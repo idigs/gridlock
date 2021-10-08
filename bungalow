@@ -41,18 +41,66 @@ _os_check() {
 }
 
 
+_yield_image_readybake() {
+
+  local readonly outsetdir="${PWD}"
+  cd $(mktemp -d) || _error_fatal "unable to allocate temp dir"
+
+  cat > ./Dockerfile <<-__EOF__
+
+	FROM rikorose/gcc-cmake:gcc-10
+
+	__EOF__
+
+  echo; echo "${PWD}"; cat ./*; echo; echo; echo
+  docker build --tag bungalow_readybake .
+
+  cd -
+  [[ "${OLDPWD}" != "${outsetdir}" ]] && rm -rf ${OLDPWD}
+}
+
+
+_yield_image_readybake_alpine() {
+
+  local readonly outsetdir="${PWD}"
+  cd $(mktemp -d) || _error_fatal "unable to allocate temp dir"
+
+  cat > ./Dockerfile <<-__EOF__
+
+	FROM alpine:3.14.2
+	RUN set -x \
+	  && apk add --no-cache \
+	      cmake gfortran libgfortran netcdf-dev
+
+	__EOF__
+
+  cat > ./.env <<-__EOF__
+
+	FC=gfortran
+	CXX=g++
+	NETCDF_FLAGS=" -D_NETCDF"
+	L_NETCDF=" -L/usr/lib/x86_64-linux-gnu/lib -lnetcdff"
+	I_NETCDF=" -I/usr/include"
+
+	__EOF__
+
+  echo; echo "${PWD}"; cat ./*; echo; echo; echo
+  docker build --tag bungalow_readybake .
+
+  cd -
+  [[ "${OLDPWD}" != "${outsetdir}" ]] && rm -rf ${OLDPWD}
+
+}
+
+
 __bungalow_alpine() {
 
-  source /etc/os-release
-
+  
   echo
 }
 
 
 __bungalow_centos() {
-
-  echo
-
 
   _os_check "centos" "7"
 }
