@@ -1,0 +1,57 @@
+#!/bin/bash
+
+_error() {
+
+  local readonly msg="$1"
+
+  echo "."
+  echo "."
+  echo "bungalow >> [Error] << ${msg}"
+  echo "."
+  echo "."
+
+  return 1
+}
+
+
+_error_fatal() {
+
+  local readonly msg="$1"
+
+  echo "."
+  echo "."
+  echo "bungalow >> [Fatal Error] << ${msg}"
+  echo "."
+  echo "."
+
+  exit 1
+}
+
+
+_ready_buildenv_centos() {
+
+  echo
+}
+
+
+_ready_buildenv_debian() {
+
+  echo
+}
+
+
+_ready_buildenv_ubuntu() {
+
+  echo
+}
+
+
+__bunaglow_build() {
+
+}
+
+
+__bungalow_debug() {
+
+}
+
