@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 _error() {
 
@@ -28,30 +28,53 @@ _error_fatal() {
 }
 
 
-_ready_buildenv_centos() {
+_os_check() {
+
+  . /etc/os-release
+
+  [[ ${1,,} =~ ${ID}${ID:+|}${ID_LIKE// /|} ]] \
+    && [[ ${VERSION_ID} =~ ${2,,} ]]           \
+    && [[ ${CPE_NAME}   =~ ${3,,} ]]           \
+    && return 0
+
+  return 1
+}
+
+
+__bungalow_alpine() {
+
+  source /etc/os-release
 
   echo
 }
 
 
-_ready_buildenv_debian() {
+__bungalow_centos() {
+
+  echo
+
+
+  _os_check "centos" "7"
+}
+
+
+__bungalow_debian() {
 
   echo
 }
 
 
-_ready_buildenv_ubuntu() {
+__bungalow_macos() {
 
   echo
 }
 
 
-__bunaglow_build() {
+__bungalow_ubuntu() {
 
+  echo
 }
 
 
-__bungalow_debug() {
-
-}
+[[ -n "$1" ]] && "__bungalow_$1" "$@"
 
