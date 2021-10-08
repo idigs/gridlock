@@ -85,40 +85,40 @@ _yield_image_readybake_alpine() {
 	__EOF__
 
   echo; echo "${PWD}"; cat ./*; echo; echo; echo
-  docker build --tag bungalow_readybake .
+  docker build --tag bungalow_readybake_alpine .
 
   cd -
   [[ "${OLDPWD}" != "${outsetdir}" ]] && rm -rf ${OLDPWD}
-
 }
 
 
-__bungalow_alpine() {
-
-  
-  echo
-}
-
-
-__bungalow_centos() {
-
-  _os_check "centos" "7"
-}
-
-
-__bungalow_debian() {
+_yield_image_readybake_centos() {
 
   echo
 }
 
 
-__bungalow_macos() {
+_yield_image_readybake_debian() {
 
   echo
 }
 
 
-__bungalow_ubuntu() {
+_yield_image_readybake_ubuntu() {
+
+  echo
+}
+
+
+__bungalow_build() {
+
+  local readonly os_id="${1,,}"
+
+  echo
+}
+
+
+__bungalow_debug() {
 
   echo
 }
