@@ -28,23 +28,10 @@ _error_fatal() {
 }
 
 
-_os_check() {
-
-  . /etc/os-release
-
-  [[ ${1,,} =~ ${ID}${ID:+|}${ID_LIKE// /|} ]] \
-    && [[ ${VERSION_ID} =~ ${2,,} ]]           \
-    && [[ ${CPE_NAME}   =~ ${3,,} ]]           \
-    && return 0
-
-  return 1
-}
-
-
 _yield_image_readybake() {
 
-  local rc
   local readonly outsetdir="${PWD}"
+  local rc
 
   cd $(mktemp -d) || return 1
 
@@ -118,13 +105,17 @@ _yield_image_readybake_ubuntu() {
 
 _ready_buildenv() {
 
-  local readonly readybake_image="${1:=bungalow_readybake}"
+  local readonly flavor="$1"
+  local readonly readybake_image="bungalow_readybake${flavor:+_}${flavor}:latest"
   local readonly current_dirname="${PWD##*/}"
 
-  local container_id <<< $(
+  local container_id
+
+  read container_id <<< $(
   	docker create --interactive --tty ${readybake_image}
   )
-  [[ -n "${container_id}" ]] || return 1
+
+  [[ -n ${container_id} ]] || return 1
 
   docker cp . ${container_id}:/root/${current_dirname}
 
@@ -150,9 +141,13 @@ __bungalow_build() {
   local readonly os_id="${1,,}"
   local readonly current_dirname="${PWD##*/}"
 
-  _yield_image_readybake  || _error_fatal ""
-  _ready_buildenv         || _error_fatal ""
-  _cmake_ordinary         || _error       "build failure"
+  _yield_image_readybake  || _error_fatal "_yield_image_readybake"
+  _ready_buildenv         || _error_fatal "_ready_buildenv"
+
+  docker start  $BUILDENV_CONTAINER_ID
+  #docker start  $BUILDENV_CONTAINER_ID
+
+  _cmake_ordinary || _error "_cmake_ordinary"
 
   echo
 }
