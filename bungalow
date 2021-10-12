@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 _error() {
 
@@ -44,7 +44,7 @@ _os_check() {
 _yield_image_readybake() {
 
   local readonly outsetdir="${PWD}"
-  cd $(mktemp -d) || _error_fatal "unable to allocate temp dir"
+  cd $(mktemp -d) || return 1
 
   cat > ./Dockerfile <<-__EOF__
 
@@ -53,10 +53,10 @@ _yield_image_readybake() {
 	__EOF__
 
   echo; echo "${PWD}"; cat ./*; echo; echo; echo
-  docker build --tag bungalow_readybake .
+  docker build --tag bungalow_readybake . || return 1
 
   cd -
-  [[ "${OLDPWD}" != "${outsetdir}" ]] && rm -rf ${OLDPWD}
+  [[ ${OLDPWD} != ${outsetdir} ]] && rm -rf ${OLDPWD}
 }
 
 
@@ -110,9 +110,26 @@ _yield_image_readybake_ubuntu() {
 }
 
 
+_ready_buildenv_cmake() {
+
+  local readonly readybake_image="${1:=bungalow_readybake}"
+
+  local container_id <<< $(
+  	docker create --interactive --tty ${readybake_image}
+  )
+
+  [[ -n "${container_id}" ]] || return 1
+
+  BUILDENV_CONTAINER_ID="${container_id}"
+}
+
+
 __bungalow_build() {
 
   local readonly os_id="${1,,}"
+
+  _yield_image_readybake
+  _ready_buildenv_cmake || _error_fatal ""
 
   echo
 }
@@ -122,6 +139,9 @@ __bungalow_debug() {
 
   echo
 }
+
+
+BUILDENV_CONTAINER_ID=""
 
 
 [[ -n "$1" ]] && "__bungalow_$1" "$@"
