@@ -110,31 +110,49 @@ _yield_image_readybake_ubuntu() {
 }
 
 
-_ready_buildenv_cmake() {
+_ready_buildenv() {
 
   local readonly readybake_image="${1:=bungalow_readybake}"
+  local readonly current_dirname="${PWD##*/}"
 
   local container_id <<< $(
   	docker create --interactive --tty ${readybake_image}
   )
-
   [[ -n "${container_id}" ]] || return 1
 
+  docker cp . ${container_id}:/root/${current_dirname}
+
   BUILDENV_CONTAINER_ID="${container_id}"
+}
+
+
+_cmake_ordinary() {
+
+  cat <<-__EOT__ | docker exec --interactive $BUILDENV_CONTAINER_ID /bin/sh
+
+	cd /root/${current_dirname}
+	mkdir ./build && cd ./build
+	cmake .. && make
+
+	exit
+	__EOT__
 }
 
 
 __bungalow_build() {
 
   local readonly os_id="${1,,}"
+  local readonly current_dirname="${PWD##*/}"
 
   _yield_image_readybake  || _error_fatal ""
-  _ready_buildenv_cmake   || _error_fatal ""
+  _ready_buildenv         || _error_fatal ""
+  _cmake_ordinary         || _error       "build failure"
 
   echo
 }
 
 
+#__bungalow_trace() {}
 __bungalow_debug() {
 
   echo
@@ -142,7 +160,6 @@ __bungalow_debug() {
 
 
 BUILDENV_CONTAINER_ID=""
-
 
 [[ -n "$1" ]] && "__bungalow_$1" "$@"
 
