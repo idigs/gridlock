@@ -1,0 +1,55 @@
+#!/bin/bash
+
+_error() {
+
+  local readonly msg="$1"
+
+  echo "."
+  echo "."
+  echo "bodega >> [Error] << ${msg}"
+  echo "."
+  echo "."
+
+  return 1
+}
+
+
+_error_fatal() {
+
+  local readonly msg="$1"
+
+  echo "."
+  echo "."
+  echo "bodega >> [Fatal Error] << ${msg}"
+  echo "."
+  echo "."
+
+  exit 1
+}
+
+
+_os_check() {
+
+  . /etc/os-release
+
+  [[ ${1,,} =~ ${ID}${ID:+|}${ID_LIKE// /|} ]] \
+    && [[ ${VERSION_ID} =~ ${2,,} ]]           \
+    && [[ ${CPE_NAME}   =~ ${3,,} ]]           \
+    && return 0
+
+  return 1
+}
+
+
+_ready_debian() {
+
+  sudo -- apt-get update
+  sudo -- apt-get install cmake
+}
+
+
+_ready_macos() {
+
+  brew install cmake
+}
+
