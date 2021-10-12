@@ -128,8 +128,8 @@ __bungalow_build() {
 
   local readonly os_id="${1,,}"
 
-  _yield_image_readybake
-  _ready_buildenv_cmake || _error_fatal ""
+  _yield_image_readybake  || _error_fatal ""
+  _ready_buildenv_cmake   || _error_fatal ""
 
   echo
 }
