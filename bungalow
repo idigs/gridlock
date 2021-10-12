@@ -43,7 +43,9 @@ _os_check() {
 
 _yield_image_readybake() {
 
+  local rc
   local readonly outsetdir="${PWD}"
+
   cd $(mktemp -d) || return 1
 
   cat > ./Dockerfile <<-__EOF__
@@ -53,10 +55,14 @@ _yield_image_readybake() {
 	__EOF__
 
   echo; echo "${PWD}"; cat ./*; echo; echo; echo
-  docker build --tag bungalow_readybake . || return 1
+  docker build --tag bungalow_readybake .
+
+  rc="$?"
 
   cd -
   [[ ${OLDPWD} != ${outsetdir} ]] && rm -rf ${OLDPWD}
+
+  return "${rc}"
 }
 
 
