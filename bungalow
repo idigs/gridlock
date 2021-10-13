@@ -140,11 +140,14 @@ __bungalow_build() {
   _yield_image_readybake  || _error_fatal "_yield_image_readybake"
   _ready_buildenv         || _error_fatal "_ready_buildenv"
 
-  docker start $BUILDENV_CONTAINER_ID
+  docker start  $BUILDENV_CONTAINER_ID
 
   docker exec \
     --interactive $BUILDENV_CONTAINER_ID \
     /bin/sh -c "bodega build" || _error "build failure"
+
+  docker stop   $BUILDENV_CONTAINER_ID
+  docker rm     $BUILDENV_CONTAINER_ID
 
   echo
 }
