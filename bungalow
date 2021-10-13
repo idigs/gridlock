@@ -115,7 +115,7 @@ _ready_buildenv() {
 
   local readonly flavor="$1"
   local readonly readybake_image="bungalow_readybake${flavor:+_}${flavor}:latest"
-  local readonly current_dirname="${PWD##*/}"
+  #local readonly current_dirname="${PWD##*/}"
 
   local container_id
 
@@ -132,31 +132,19 @@ _ready_buildenv() {
 }
 
 
-_cmake_ordinary() {
-
-  cat <<-__EOT__ | docker exec --interactive $BUILDENV_CONTAINER_ID /bin/sh
-
-	cd /root/${current_dirname}
-	mkdir ./build && cd ./build
-	cmake .. && make
-
-	__EOT__
-}
-
-
 __bungalow_build() {
 
   local readonly os_id="${1,,}"
-  local readonly current_dirname="${PWD##*/}"
+  #local readonly current_dirname="${PWD##*/}"
 
   _yield_image_readybake  || _error_fatal "_yield_image_readybake"
   _ready_buildenv         || _error_fatal "_ready_buildenv"
 
   docker start $BUILDENV_CONTAINER_ID
 
-  #_cmake_ordinary || _error "_cmake_ordinary"
-
-  docker exec --interactive $BUILDENV_CONTAINER_ID /bin/sh -c "bodega build"
+  docker exec \
+    --interactive $BUILDENV_CONTAINER_ID \
+    /bin/sh -c "bodega build" || _error "build failure"
 
   echo
 }
