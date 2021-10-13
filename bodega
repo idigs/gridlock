@@ -41,15 +41,37 @@ _os_check() {
 }
 
 
-_ready_debian() {
+_setup_ubuntu() {
 
   sudo -- apt-get update
   sudo -- apt-get install cmake
 }
 
 
-_ready_macos() {
+_setup_macos() {
 
   brew install cmake
 }
+
+
+_cmake_ordinary() {
+
+  mkdir ./build && cd $_
+  cmake .. && make
+}
+
+
+__bodega_build() {
+
+  _cmake_ordinary
+}
+
+
+__bodega_test() {
+
+  echo
+}
+
+
+[[ -n "$1" ]] && "__bodega_$1" "$@"
 

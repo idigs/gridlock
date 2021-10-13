@@ -35,9 +35,17 @@ _yield_image_readybake() {
 
   cd $(mktemp -d) || return 1
 
+  cp ${outsetdir}/bodega .
+
   cat > ./Dockerfile <<-__EOF__
 
 	FROM rikorose/gcc-cmake:gcc-10
+	COPY ./bodega /usr/local/bin
+	RUN set -x \
+	  && chmod +x /usr/local/bin/bodega \
+	  && mkdir -p /var/bungalow
+
+	WORKDIR /var/bungalow
 
 	__EOF__
 
@@ -112,12 +120,13 @@ _ready_buildenv() {
   local container_id
 
   read container_id <<< $(
-  	docker create --interactive --tty ${readybake_image}
+  	docker create --interactive --tty --workdir /var/bungalow ${readybake_image}
   )
 
   [[ -n ${container_id} ]] || return 1
 
-  docker cp . ${container_id}:/root/${current_dirname}
+  docker cp . ${container_id}:/var/bungalow
+  #docker cp . ${container_id}:/var/bungalow/${current_dirname}
 
   BUILDENV_CONTAINER_ID="${container_id}"
 }
@@ -131,7 +140,6 @@ _cmake_ordinary() {
 	mkdir ./build && cd ./build
 	cmake .. && make
 
-	exit
 	__EOT__
 }
 
@@ -144,10 +152,11 @@ __bungalow_build() {
   _yield_image_readybake  || _error_fatal "_yield_image_readybake"
   _ready_buildenv         || _error_fatal "_ready_buildenv"
 
-  docker start  $BUILDENV_CONTAINER_ID
-  #docker start  $BUILDENV_CONTAINER_ID
+  docker start $BUILDENV_CONTAINER_ID
 
-  _cmake_ordinary || _error "_cmake_ordinary"
+  #_cmake_ordinary || _error "_cmake_ordinary"
+
+  docker exec --interactive $BUILDENV_CONTAINER_ID /bin/sh -c "bodega build"
 
   echo
 }
