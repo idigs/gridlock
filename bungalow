@@ -61,7 +61,7 @@ _yield_image_readybake() {
 	__EOF__
 
   echo; echo "${PWD}"; cat ./*; echo; echo; echo
-  docker build --tag bungalow_readybake .
+  DOCKER_BUILDKIT=1 docker build --tag bungalow_readybake .
 
   rc="$?"
 
