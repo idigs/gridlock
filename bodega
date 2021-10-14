@@ -1,5 +1,15 @@
 #!/bin/bash
 
+_debug() {
+
+  local readonly msg="$1"
+
+  echo "."
+  echo "bodega >> [Debug] << ${msg}"
+  echo "."
+}
+
+
 _error() {
 
   local readonly msg="$1"
