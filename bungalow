@@ -40,7 +40,6 @@ _error_fatal() {
 
 _yield_image_readybake() {
 
-  #local readonly outsetdir="${PWD}"
   local readonly outsetdir="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
   local rc
 
@@ -131,7 +130,7 @@ _ready_buildenv() {
   local container_id
 
   read container_id <<< $(
-  	docker create --interactive --tty --workdir /var/bungalow ${readybake_image}
+  	docker create --interactive --tty ${readybake_image}
   )
 
   [[ -n ${container_id} ]] || return 1
