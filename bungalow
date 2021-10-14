@@ -40,7 +40,8 @@ _error_fatal() {
 
 _yield_image_readybake() {
 
-  local readonly outsetdir="${PWD}"
+  #local readonly outsetdir="${PWD}"
+  local readonly outsetdir="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
   local rc
 
   cd $(mktemp -d) || return 1
