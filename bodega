@@ -64,6 +64,71 @@ _setup_macos() {
 }
 
 
+_yield_cmake_defs_default() {
+
+  echo
+}
+
+
+_yield_cmake_defaults() {
+
+  #local readonly origindir="$( pwd -P )"
+  #local readonly scriptdir="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+  local item
+
+  #cd $(mktemp -d) || return 1
+
+  # https://unix.stackexchange.com/questions/3510/how-to-print-only-defined-variables-shell-and-or-environment-variables-in-bash
+  #read outset_vars <<< $(
+  #  set 2>/dev/null | while read a
+  #    do [[ $a == *=* ]] || break
+  #      echo ${a/=*}
+  #    done
+  #)
+
+  # https://stackoverflow.com/questions/1305237/how-to-list-variables-declared-in-script-in-bash
+  # read outset_vars <<< $( set -o posix ; set )
+
+  while read item; do
+    cmake_args="${cmake_args}${item:+ -D${item}}"
+  done < <( cat <<-__EOF__
+
+    CMAKE_BUILD_TYPE=Release
+    CMAKE_Fortran_COMPILER=mpifort
+
+	__EOF__
+  )
+
+  echo ${cmake_args}
+
+  #set 2>/dev/null | while read a; do [[ $a == *=* ]] || break; echo ${a/=*}; done
+
+  #cd -
+  #[[ ${OLDPWD} != ${origindir} ]] && rm -rf ${OLDPWD}
+
+  BODEGA_CMAKE_ARGS="${cmake_args}"
+
+}
+
+
+_cmake_intel() {
+
+  echo
+}
+
+
+_cmake_mpiwrapper() {
+
+  echo
+}
+
+
+_render_cmake_args() {
+
+  env | grep "CMAKE_"
+}
+
+
 _cmake_ordinary() {
 
   mkdir -p ./build && cd $_
@@ -85,3 +150,12 @@ __bodega_test() {
 
 [[ -n "$1" ]] && "__bodega_$1" "$@"
 
+#source ./cmake_definitions
+
+
+#-DCMAKE_BUILD_TYPE=Debug
+#-DCMAKE_BUILD_TYPE=Release
+
+# ${CMAKE_BUILD_TYPE:+-DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE}
+
+# -DCMAKE_Fortran_COMPILER=/usr/local/opt/gfortran/bin/gfortran
