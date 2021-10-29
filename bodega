@@ -107,6 +107,7 @@ _yield_cmake_defaults_typeA() {
 _yield_cmake_defs() {
 
   local outsetvars
+  local postvars
 
   read outsetvars <<< $(
     set 2>/dev/null | while read a
@@ -125,19 +126,10 @@ _yield_cmake_defs() {
       done
   )
 
-  _debug "tatum"
-
-  echo $outsetvars
-
-  _debug "tinker"
-
-  echo $postvars
-
-  _debug "titus"
-
-  echo "$outsetvars" "$postvars" | tr ' ' '\n' | sort | uniq -u
-
-  BODEGA_CMAKE_DEFINITION_VARS="$(echo ${outsetvars} ${postvars} | tr ' ' '\n' | sort | uniq -u | tr '\n' ' ')"
+  # find the symmetric difference of the two var sets and save these under a global var
+  read BODEGA_CMAKE_DEFINITION_VARS <<< $(
+  	echo ${outsetvars} ${postvars} | tr ' ' '\n' | sort | uniq -u | tr '\n' ' '
+  )
 }
 
 
