@@ -51,6 +51,21 @@ _os_check() {
 }
 
 
+_stash_outset_vars() {
+
+  local outset_vars
+
+  read outset_vars <<< $(
+    set 2>/dev/null | while read a
+      do [[ $a == *=* ]] || break
+        echo ${a/=*}
+      done
+  )
+
+  BODEGA_OUTSET_VARS="${outset_vars}"
+}
+
+
 _setup_ubuntu() {
 
   sudo -- apt-get update
@@ -70,30 +85,59 @@ _yield_cmake_defs_default() {
 }
 
 
-_yield_cmake_defaults() {
+_yield_cmake_defaults_typeA() {
 
-  local cmake_args
+  local cmake_definitions
   local item
 
   while read item; do
-    cmake_args="${cmake_args}${item:+ -D${item}}"
+    cmake_definitions="${cmake_definitions}${item:+ -D${item}}"
   done < <( cat <<-__EOF__
 
     CMAKE_BUILD_TYPE=Release
-    CMAKE_Fortran_COMPILER=mpifort
+    CMAKE_Fortran_COMPILER=/usr/local/opt/gfortran/bin/gfortran
 
 	__EOF__
   )
 
-  echo ${cmake_args}
+  BODEGA_CMAKE_DEFINITIONS="${cmake_definitions}"
+}
 
-  #set 2>/dev/null | while read a; do [[ $a == *=* ]] || break; echo ${a/=*}; done
 
-  #cd -
-  #[[ ${OLDPWD} != ${origindir} ]] && rm -rf ${OLDPWD}
+_yield_cmake_defs() {
 
-  BODEGA_CMAKE_ARGS="${cmake_args}"
+  local outsetvars
 
+  read outsetvars <<< $(
+    set 2>/dev/null | while read a
+      do [[ $a == *=* ]] || break
+        echo ${a/=*}
+      done
+  )
+
+  CMAKE_BUILD_TYPE=Release
+  CMAKE_Fortran_COMPILER=/usr/local/opt/gfortran/bin/gfortran
+
+  read postvars <<< $(
+    set 2>/dev/null | while read a
+      do [[ $a == *=* ]] || break
+        echo ${a/=*}
+      done
+  )
+
+  _debug "tatum"
+
+  echo $outsetvars
+
+  _debug "tinker"
+
+  echo $postvars
+
+  _debug "titus"
+
+  echo "$outsetvars" "$postvars" | tr ' ' '\n' | sort | uniq -u
+
+  BODEGA_CMAKE_DEFINITION_VARS="$(echo ${outsetvars} ${postvars} | tr ' ' '\n' | sort | uniq -u | tr '\n' ' ')"
 }
 
 
@@ -124,6 +168,8 @@ _cmake_ordinary() {
 
 __bodega_build() {
 
+  #_stash_outset_vars
+  #_yield_cmake_defs
   _cmake_ordinary
 }
 
@@ -134,7 +180,13 @@ __bodega_test() {
 }
 
 
+BODEGA_OUTSET_VARS=''
+BODEGA_CMAKE_DEFINITION_VARS=''
+
 [[ -n "$1" ]] && "__bodega_$1" "$@"
+
+echo $BODEGA_CMAKE_DEFINITION_VARS
+
 
 #source ./cmake_definitions
 
@@ -142,6 +194,3 @@ __bodega_test() {
 #-DCMAKE_BUILD_TYPE=Debug
 #-DCMAKE_BUILD_TYPE=Release
 
-# ${CMAKE_BUILD_TYPE:+-DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE}
-
-# -DCMAKE_Fortran_COMPILER=/usr/local/opt/gfortran/bin/gfortran
