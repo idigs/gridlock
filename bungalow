@@ -40,12 +40,13 @@ _error_fatal() {
 
 _yield_image_readybake() {
 
-  local readonly outsetdir="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+  local readonly outsetdir="$( pwd -P )"
+  local readonly scriptdir="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
   local rc
 
   cd $(mktemp -d) || return 1
 
-  cp ${outsetdir}/bodega .
+  cp ${scriptdir}/bodega .
 
   cat > ./Dockerfile <<-__EOF__
 
@@ -59,7 +60,7 @@ _yield_image_readybake() {
 
 	__EOF__
 
-  echo; echo "${PWD}"; cat ./*; echo; echo; echo
+  echo; echo "${PWD}"; cat ./Dockerfile ; echo; echo; echo
   DOCKER_BUILDKIT=1 docker build --tag bungalow_readybake .
 
   rc="$?"
