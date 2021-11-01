@@ -51,7 +51,7 @@ _os_check() {
 }
 
 
-_denote_outset_vars() {
+_denote_varlist_outset() {
 
   local outset_vars
 
@@ -62,11 +62,11 @@ _denote_outset_vars() {
       done
   )
 
-  BODEGA_OUTSET_VARS="${outset_vars}"
+  BODEGA_VARLIST_OUTSET="${outset_vars}"
 }
 
 
-_accrue_cmake_definitions() {
+_accrue_varlist_cmake_definitions() {
 
   local current_vars
   local latest_vars
@@ -81,7 +81,7 @@ _accrue_cmake_definitions() {
 
   # find the symmetric difference of the two var sets (outset and current)
   read latest_vars <<< $(
-    echo $BODEGA_OUTSET_VARS ${current_vars} | tr ' ' '\n' | sort | uniq -u | tr '\n' ' '
+    echo $BODEGA_VARLIST_OUTSET ${current_vars} | tr ' ' '\n' | sort | uniq -u | tr '\n' ' '
   )
 
   # isolate new vars that serve as cmake definitions
@@ -89,7 +89,13 @@ _accrue_cmake_definitions() {
     echo ${latest_vars} | tr ' ' '\n' | grep "^CMAKE_*" | tr '\n' ' '
   )
 
-  BODEGA_CMAKE_DEFINITION_VARS="${cmake_vars}"
+  BODEGA_VARLIST_CMAKE_DEFINITIONS="${cmake_vars}"
+}
+
+
+_render_cmake_args() {
+
+  echo #BODEGA_VARLIST_CMAKE_DEFINITION | while read a;
 }
 
 
@@ -112,35 +118,9 @@ _setup_nersc_cori() {
 }
 
 
-_yield_cmake_defaults_typeA() {
-
-  local cmake_definitions
-  local item
-
-  while read item; do
-    cmake_definitions="${cmake_definitions}${item:+ -D${item}}"
-  done < <( cat <<-__EOF__
-
-    CMAKE_BUILD_TYPE=Release
-    CMAKE_Fortran_COMPILER=/usr/local/opt/gfortran/bin/gfortran
-
-	__EOF__
-  )
-
-  BODEGA_CMAKE_DEFINITIONS="${cmake_definitions}"
-}
-
-
-_yield_cmake_oneoff() {
-
-  CMAKE_PREFIX_PATH="/opt/usr/lib"
-}
-
-
 _yield_defaults_cmake() {
 
   CMAKE_BUILD_TYPE=Release
-  CMAKE_Fortran_COMPILER=/usr/local/opt/gfortran/bin/gfortran
   CMAKE_PREFIX_PATH="${some_othervar}:/usr/local/lib"
 }
 
@@ -158,41 +138,30 @@ _cmake_mpiwrapper() {
 }
 
 
-_render_cmake_args() {
-
-  echo #BODEGA_CMAKE_DEFINITION_VARS | while read a;
-}
-
-
 _cmake_ordinary() {
 
   mkdir -p ./build && cd $_
   cmake .. && make
 }
 
-# ./build/cmake_profile_nersc
-
-#  CMAKE_BUILD_TYPE=Release
-#  CMAKE_Fortran_COMPILER=/usr/local/opt/gfortran/bin/gfortran
-#  CMAKE_PREFIX_PATH="${some_othervar}:/usr/local/lib"
-
 
 __bodega_build() {
 
-  #_denote_outset_vars
-  #_yield_defaults_cmake
-  #_accrue_cmake_definitions
+  _denote_varlist_outset
 
+  _yield_defaults_cmake
+  _accrue_varlist_cmake_definitions
 
-  _cmake_ordinary
+  _render_cmdline_cmake_definitions
+
+  mkdir -p ./build && cd $_
+  cmake .. && make
 
   # differentiate by:
     # - compute_env:   [ nersc github ]
     # - os_type:       [ ubuntu macos ]
     # - mpi_wrapper:   [ openmpi mpich intel ]
     # - 
-
-
 }
 
 
@@ -202,12 +171,13 @@ __bodega_test() {
 }
 
 
-BODEGA_OUTSET_VARS=''
-BODEGA_CMAKE_DEFINITION_VARS=''
+BODEGA_VARLIST_OUTSET=''
+BODEGA_VARLIST_CMAKE_DEFINITIONS=''
+BODEGA_CMDLINE_CMAKE_DEFINITIONS=''
 
 [[ -n "$1" ]] && "__bodega_$1" "$@"
 
-echo $BODEGA_CMAKE_DEFINITION_VARS
+echo $BODEGA_VARLIST_CMAKE_DEFINITION
 
 
 #source ./cmake_definitions
