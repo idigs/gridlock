@@ -93,7 +93,7 @@ _accrue_varlist_cmake_definitions() {
 }
 
 
-_render_cmake_args() {
+_render_cmdline_cmake_definitions() {
 
   echo #BODEGA_VARLIST_CMAKE_DEFINITION | while read a;
 }
@@ -177,7 +177,7 @@ BODEGA_CMDLINE_CMAKE_DEFINITIONS=''
 
 [[ -n "$1" ]] && "__bodega_$1" "$@"
 
-echo $BODEGA_VARLIST_CMAKE_DEFINITION
+echo $BODEGA_VARLIST_CMAKE_DEFINITIONS
 
 
 #source ./cmake_definitions
