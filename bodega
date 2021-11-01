@@ -51,7 +51,7 @@ _os_check() {
 }
 
 
-_stash_outset_vars() {
+_denote_outset_vars() {
 
   local outset_vars
 
@@ -63,6 +63,33 @@ _stash_outset_vars() {
   )
 
   BODEGA_OUTSET_VARS="${outset_vars}"
+}
+
+
+_accrue_cmake_definitions() {
+
+  local current_vars
+  local latest_vars
+  local cmake_vars
+
+  read current_vars <<< $(
+    set 2>/dev/null | while read a
+      do [[ $a == *=* ]] || break
+        echo ${a/=*}
+      done
+  )
+
+  # find the symmetric difference of the two var sets (outset and current)
+  read latest_vars <<< $(
+    echo $BODEGA_OUTSET_VARS ${current_vars} | tr ' ' '\n' | sort | uniq -u | tr '\n' ' '
+  )
+
+  # isolate new vars that serve as cmake definitions
+  read cmake_vars <<< $(
+    echo ${latest_vars} | tr ' ' '\n' | grep "^CMAKE_*" | tr '\n' ' '
+  )
+
+  BODEGA_CMAKE_DEFINITION_VARS="${cmake_vars}"
 }
 
 
@@ -79,9 +106,9 @@ _setup_macos() {
 }
 
 
-_yield_cmake_defs_default() {
+_setup_nersc_cori() {
 
-  echo
+  module load cmake
 }
 
 
@@ -104,50 +131,36 @@ _yield_cmake_defaults_typeA() {
 }
 
 
-_yield_cmake_defs() {
+_yield_cmake_oneoff() {
 
-  local outsetvars
-  local postvars
-
-  read outsetvars <<< $(
-    set 2>/dev/null | while read a
-      do [[ $a == *=* ]] || break
-        echo ${a/=*}
-      done
-  )
-
-  CMAKE_BUILD_TYPE=Release
-  CMAKE_Fortran_COMPILER=/usr/local/opt/gfortran/bin/gfortran
-
-  read postvars <<< $(
-    set 2>/dev/null | while read a
-      do [[ $a == *=* ]] || break
-        echo ${a/=*}
-      done
-  )
-
-  # find the symmetric difference of the two var sets and save these under a global var
-  read BODEGA_CMAKE_DEFINITION_VARS <<< $(
-  	echo ${outsetvars} ${postvars} | tr ' ' '\n' | sort | uniq -u | tr '\n' ' '
-  )
+  CMAKE_PREFIX_PATH="/opt/usr/lib"
 }
 
 
-_cmake_intel() {
+_yield_defaults_cmake() {
 
-  echo
+  CMAKE_BUILD_TYPE=Release
+  CMAKE_Fortran_COMPILER=/usr/local/opt/gfortran/bin/gfortran
+  CMAKE_PREFIX_PATH="${some_othervar}:/usr/local/lib"
+}
+
+
+_cmake_macos_github() {
+
+  CMAKE_Fortran_COMPILER=/usr/local/opt/gfortran/bin/gfortran
 }
 
 
 _cmake_mpiwrapper() {
 
-  echo
+  CMAKE_C_COMPILER=/opt/intel/compilers_and_libraries_2019.3.199/linux/bin/intel64/ifort
+  echo module load openmpi
 }
 
 
 _render_cmake_args() {
 
-  env | grep "CMAKE_"
+  echo #BODEGA_CMAKE_DEFINITION_VARS | while read a;
 }
 
 
@@ -157,12 +170,29 @@ _cmake_ordinary() {
   cmake .. && make
 }
 
+# ./build/cmake_profile_nersc
+
+#  CMAKE_BUILD_TYPE=Release
+#  CMAKE_Fortran_COMPILER=/usr/local/opt/gfortran/bin/gfortran
+#  CMAKE_PREFIX_PATH="${some_othervar}:/usr/local/lib"
+
 
 __bodega_build() {
 
-  #_stash_outset_vars
-  #_yield_cmake_defs
+  #_denote_outset_vars
+  #_yield_defaults_cmake
+  #_accrue_cmake_definitions
+
+
   _cmake_ordinary
+
+  # differentiate by:
+    # - compute_env:   [ nersc github ]
+    # - os_type:       [ ubuntu macos ]
+    # - mpi_wrapper:   [ openmpi mpich intel ]
+    # - 
+
+
 }
 
 
