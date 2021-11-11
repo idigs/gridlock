@@ -95,7 +95,15 @@ _accrue_varlist_cmake_definitions() {
 
 _render_cmdline_cmake_definitions() {
 
-  echo #BODEGA_VARLIST_CMAKE_DEFINITION | while read a;
+  read cmake_defs <<< $(
+  echo $BODEGA_VARLIST_CMAKE_DEFINITIONS | tr ' ' '\n' | while read a
+    do
+      echo -n "${a:+ }-D${a}=${!a}"
+    done
+    echo
+  )
+
+  BODEGA_CMDLINE_CMAKE_DEFINITIONS="${cmake_defs}"
 }
 
 
@@ -121,7 +129,7 @@ _setup_nersc_cori() {
 _yield_defaults_cmake() {
 
   CMAKE_BUILD_TYPE=Release
-  CMAKE_PREFIX_PATH="${some_othervar}:/usr/local/lib"
+  #CMAKE_PREFIX_PATH="${some_othervar}:/usr/local/lib"
 }
 
 
@@ -141,7 +149,7 @@ _cmake_mpiwrapper() {
 _cmake_ordinary() {
 
   mkdir -p ./build && cd $_
-  cmake .. && make
+  cmake $BODEGA_CMDLINE_CMAKE_DEFINITIONS .. && make
 }
 
 
@@ -154,11 +162,15 @@ __bodega_build() {
 
   _render_cmdline_cmake_definitions
 
-  mkdir -p ./build && cd $_
-  cmake .. && make
+  echo; echo; _debug "print CMake definitions - BEGIN"
+  echo; echo $BODEGA_CMDLINE_CMAKE_DEFINITIONS | tr ' ' '\n'
+  echo; echo; _debug "print CMake definitions - END"
+  echo; echo
+
+  _cmake_ordinary
 
   # differentiate by:
-    # - compute_env:   [ nersc github ]
+    # - compute_env:   [ nersc github docker ]
     # - os_type:       [ ubuntu macos ]
     # - mpi_wrapper:   [ openmpi mpich intel ]
     # - 
@@ -176,8 +188,6 @@ BODEGA_VARLIST_CMAKE_DEFINITIONS=''
 BODEGA_CMDLINE_CMAKE_DEFINITIONS=''
 
 [[ -n "$1" ]] && "__bodega_$1" "$@"
-
-echo $BODEGA_VARLIST_CMAKE_DEFINITIONS
 
 
 #source ./cmake_definitions
