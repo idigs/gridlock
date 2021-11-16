@@ -167,7 +167,9 @@ __bodega_build() {
   echo; echo; _debug "print CMake definitions - END"
   echo; echo
 
-  _cmake_ordinary
+  #_cmake_ordinary
+
+  cat /etc/os-release
 
   # differentiate by:
     # - compute_env:   [ nersc github docker ]
