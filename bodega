@@ -38,7 +38,7 @@ _error_fatal() {
 }
 
 
-_os_check() {
+_os_check_linux() {
 
   . /etc/os-release
 
@@ -48,6 +48,12 @@ _os_check() {
     && return 0
 
   return 1
+}
+
+
+_os_check_macos() {
+
+  echo
 }
 
 
@@ -107,58 +113,39 @@ _render_cmdline_cmake_definitions() {
 }
 
 
-_setup_ubuntu() {
+_enact_defaults_cmake() {
 
-  sudo -- apt-get update
-  sudo -- apt-get install cmake
-}
-
-
-_setup_macos() {
-
-  brew install cmake
+  CMAKE_BUILD_TYPE=Release
 }
 
 
 _setup_nersc_cori() {
 
-  module load cmake
+  # use intel compiler and openmpi wrapper
+  CMAKE_C_COMPILER=/opt/intel/compilers_and_libraries_2019.3.199/linux/bin/intel64/ifort
+  module load openmpi
 }
 
 
-_yield_defaults_cmake() {
-
-  CMAKE_BUILD_TYPE=Release
-  #CMAKE_PREFIX_PATH="${some_othervar}:/usr/local/lib"
-}
-
-
-_cmake_macos_github() {
+_setup_macos_github() {
 
   CMAKE_Fortran_COMPILER=/usr/local/opt/gfortran/bin/gfortran
 }
 
 
-_cmake_mpiwrapper() {
 
-  CMAKE_C_COMPILER=/opt/intel/compilers_and_libraries_2019.3.199/linux/bin/intel64/ifort
-  echo module load openmpi
-}
-
-
-_cmake_ordinary() {
-
-  mkdir -p ./build && cd $_
-  cmake $BODEGA_CMDLINE_CMAKE_DEFINITIONS .. && make
-}
 
 
 __bodega_build() {
 
   _denote_varlist_outset
 
-  _yield_defaults_cmake
+  _enact_defaults_cmake
   _accrue_varlist_cmake_definitions
+
+
+  [[ _os_check_linux "rhel" "7.6" ]] \
+    && _setup_nersc_cori
 
   _render_cmdline_cmake_definitions
 
@@ -167,9 +154,13 @@ __bodega_build() {
   echo; echo; _debug "print CMake definitions - END"
   echo; echo
 
-  #_cmake_ordinary
+  getconf -a
 
-  cat /etc/os-release
+  exit
+
+  mkdir -p ./build && cd $_
+  cmake $BODEGA_CMDLINE_CMAKE_DEFINITIONS .. && make
+
 
   # differentiate by:
     # - compute_env:   [ nersc github docker ]
