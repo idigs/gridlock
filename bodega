@@ -38,7 +38,7 @@ _error_fatal() {
 }
 
 
-_os_check_linux() {
+_os_check() {
 
   . /etc/os-release
 
@@ -144,8 +144,8 @@ __bodega_build() {
   _accrue_varlist_cmake_definitions
 
 
-  #[[ _os_check_linux "rhel" "7.6" ]] \
-  #  && _setup_nersc_cori
+  [[ _os_check_linux "rhel" "7.6" ]] \
+    && _setup_nersc_cori
 
   _render_cmdline_cmake_definitions
 
@@ -155,8 +155,8 @@ __bodega_build() {
   echo; echo
 
   set -x
-  getconf _NPROCESSORS_CONF
   getconf _NPROCESSORS_ONLN
+  uname -av
 
   exit
 
