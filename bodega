@@ -154,7 +154,7 @@ __bodega_build() {
   echo; echo; _debug "print CMake definitions - END"
   echo; echo
 
-  getconf -a
+  getconf --help
 
   exit
 
