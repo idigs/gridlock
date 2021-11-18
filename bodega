@@ -154,7 +154,9 @@ __bodega_build() {
   echo; echo; _debug "print CMake definitions - END"
   echo; echo
 
+  set -x
   getconf _NPROCESSORS_CONF
+  getconf _NPROCESSORS_ONLN
 
   exit
 
