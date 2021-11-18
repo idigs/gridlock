@@ -40,11 +40,11 @@ _error_fatal() {
 
 _os_check_linux() {
 
-  . /etc/os-release
-
-  [[ ${1,,} =~ ${ID}${ID:+|}${ID_LIKE// /|} ]] \
-    && [[ ${VERSION_ID} =~ ${2,,} ]]           \
-    && [[ ${CPE_NAME}   =~ ${3,,} ]]           \
+  [[ -f /etc/os-release ]]                           \
+    && . /etc/os-release                             \
+    && [[ ${1,,} =~ ${ID}${ID:+|}${ID_LIKE// /|} ]]  \
+    && [[ ${VERSION_ID} =~ ${2,,} ]]                 \
+    && [[ ${CPE_NAME}   =~ ${3,,} ]]                 \
     && return 0
 
   return 1
