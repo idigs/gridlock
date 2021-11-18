@@ -155,9 +155,9 @@ __bodega_build() {
   _enact_defaults_cmake
   _accrue_varlist_cmake_definitions
 
-  [[ ${NERSC_HOST,,} =~ cori ]]        \
-    && _hw_check        "x86_64" "272"  \
-    && _os_check_linux  "rhel"   "7.6"   \
+  [[ ${NERSC_HOST,,} =~ cori ]]           \
+    && _hw_check        "x86_64" "64|272"  \
+    && _os_check_linux  "rhel"   "7.6"      \
     && _setup_nersc_cori
 
   _render_cmdline_cmake_definitions
