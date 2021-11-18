@@ -38,6 +38,19 @@ _error_fatal() {
 }
 
 
+_hw_check() {
+
+  local cpu_arch
+  local cpu_count
+
+  read cpu_arch   <<< $( uname -p )
+  read cpu_count  <<< $( getconf _NPROCESSORS_ONLN )
+
+  [[ ${cpu_arch} =~ ${1,,} ]] \
+    && [[ ${cpu_count} =~ ${2,,} ]]
+}
+
+
 _os_check_linux() {
 
   [[ -f /etc/os-release ]] && . /etc/os-release     \
@@ -142,8 +155,9 @@ __bodega_build() {
   _enact_defaults_cmake
   _accrue_varlist_cmake_definitions
 
-
-  _os_check_linux "rhel" "7.6" \
+  [[ ${NERSC_HOST,,} =~ cori ]]        \
+    && _hw_check        "x86_64" "272"  \
+    && _os_check_linux  "rhel"   "7.6"   \
     && _setup_nersc_cori
 
   _render_cmdline_cmake_definitions
