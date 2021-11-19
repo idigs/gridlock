@@ -144,7 +144,12 @@ _setup_nersc_cori() {
 _setup_macos_github() {
 
   CMAKE_Fortran_COMPILER=/usr/local/opt/gfortran/bin/gfortran
-  _debug "invoked _setup_macos_github()"
+}
+
+
+_setup_ubuntu_github() {
+
+  echo
 }
 
 
@@ -169,6 +174,9 @@ __bodega_build() {
 
   [[ $BODEGA_OS == "macos-latest" ]] \
     && _setup_macos_github
+
+  [[ $BODEGA_OS == "ubuntu-latest" ]] \
+    && _setup_ubuntu_github
 
   _accrue_varlist_cmake_definitions
 
