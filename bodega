@@ -131,12 +131,30 @@ _enact_defaults_cmake() {
 }
 
 
+_setup_nersc_cori_haswell() {
+
+  # AVX2 only
+
+  echo
+}
+
+
+_setup_nersc_cori_knl() {
+
+  # AVX512
+
+  # https://github.com/ORNL-Fusion/stellinstall/blob/02da8103a846ef80190adf052abacd9741447708/trunk/setup_cmake#L279
+  # -DEXTRA_FLAGS="-qopenmp -axMIC-AVX512,AVX"
+  echo
+}
+
+
 _setup_nersc_cori() {
 
   module load cmake
 
   # use intel compiler and openmpi wrapper
-  CMAKE_C_COMPILER=/opt/intel/compilers_and_libraries_2019.3.199/linux/bin/intel64/ifort
+  CMAKE_Fortran_COMPILER=/opt/intel/compilers_and_libraries_2019.3.199/linux/bin/intel64/ifort
   module load openmpi
 }
 
