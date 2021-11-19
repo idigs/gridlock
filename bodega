@@ -167,11 +167,10 @@ __bodega_build() {
     && _os_check_linux  "rhel"   "7.6"      \
     && _setup_nersc_cori
 
-  set -x
-
   [[ $BODEGA_OS == "macos-latest" ]] \
     && _setup_macos_github
 
+  _accrue_varlist_cmake_definitions
 
   _render_cmdline_cmake_definitions
 
@@ -179,6 +178,8 @@ __bodega_build() {
   echo; echo $BODEGA_CMDLINE_CMAKE_DEFINITIONS | tr ' ' '\n'
   echo; echo; _debug "print CMake definitions - END"
   echo; echo
+
+  exit
 
   mkdir -p ./build && cd $_
   cmake $BODEGA_CMDLINE_CMAKE_DEFINITIONS .. && make
