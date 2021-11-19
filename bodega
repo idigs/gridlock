@@ -193,7 +193,7 @@ __bodega_build() {
 
 __bodega_test() {
 
-  echo
+  cd ./build && make test
 }
 
 
