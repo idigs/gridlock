@@ -166,6 +166,8 @@ __bodega_build() {
     && _os_check_linux  "rhel"   "7.6"      \
     && _setup_nersc_cori
 
+  set -x
+
   [[ $BODEGA_OS =~ macos-latest ]] \
     && _setup_macos_github
 
