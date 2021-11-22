@@ -201,7 +201,8 @@ __bodega_build() {
     && _setup_macos_github
 
   [[ $BODEGA_OS == "ubuntu-latest" ]] \
-    && _setup_ubuntu_github
+    && _setup_ubuntu_github \
+    && _debug "BODEGA_OS is $BODEGA_OS"
 
   _accrue_varlist_cmake_definitions
 
