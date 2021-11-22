@@ -127,7 +127,7 @@ _render_cmdline_cmake_definitions() {
 
 _enact_defaults_cmake() {
 
-  CMAKE_BUILD_TYPE=Release
+  CMAKE_BUILD_TYPE=${BODEGA_BUILD_TYPE:-Release}
 }
 
 
@@ -135,13 +135,20 @@ _setup_nersc_cori_haswell() {
 
   # AVX2 only
 
-  echo
+  module load cmake
 }
 
 
-_setup_nersc_cori_knl() {
+_setup_nersc_cori_knl_cross_compile_scenario() {
 
   # AVX512
+
+  module load cmake
+
+  # use flags to force cross-compile
+
+  CMAKE_C_FLAGS="-axMIC-AVX512,AVX2"
+  CMAKE_Fortran_FLAGS="-axMIC-AVX512,AVX2"
 
   # https://github.com/ORNL-Fusion/stellinstall/blob/02da8103a846ef80190adf052abacd9741447708/trunk/setup_cmake#L279
   # -DEXTRA_FLAGS="-qopenmp -axMIC-AVX512,AVX"
@@ -185,7 +192,7 @@ __bodega_build() {
   _accrue_varlist_cmake_definitions
 
 
-  [[ $NERSC_HOST =~ cori ]]               \
+  [[ ${NERSC_HOST,,} =~ cori ]]               \
     && _hw_check        "x86_64" "64|272"  \
     && _os_check_linux  "rhel"   "7.6"      \
     && _setup_nersc_cori
