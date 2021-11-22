@@ -174,7 +174,7 @@ _setup_macos_github() {
 
 _setup_ubuntu_github() {
 
-  echo
+  cat /etc/os-release
 }
 
 
@@ -212,6 +212,8 @@ __bodega_build() {
   echo; echo $BODEGA_CMDLINE_CMAKE_DEFINITIONS | tr ' ' '\n'
   echo; echo; _debug "print CMake definitions - END"
   echo; echo
+
+  exit
 
   mkdir -p ./build && cd $_
   cmake $BODEGA_CMDLINE_CMAKE_DEFINITIONS .. && make
