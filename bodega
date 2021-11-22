@@ -213,8 +213,6 @@ __bodega_build() {
   echo; echo; _debug "print CMake definitions - END"
   echo; echo
 
-  exit
-
   mkdir -p ./build && cd $_
   cmake $BODEGA_CMDLINE_CMAKE_DEFINITIONS .. && make
 
