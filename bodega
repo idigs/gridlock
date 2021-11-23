@@ -76,7 +76,7 @@ _denote_varlist_outset() {
   read outset_vars <<< $(
     set 2>/dev/null | while read a
       do [[ $a == *=* ]] || break
-        echo ${a/=*}
+        echo -n "${a:+ }${a/=*}"
       done
   )
 
@@ -93,7 +93,7 @@ _accrue_varlist_cmake_definitions() {
   read current_vars <<< $(
     set 2>/dev/null | while read a
       do [[ $a == *=* ]] || break
-        echo ${a/=*}
+        echo -n "${a:+ }${a/=*}"
       done
   )
 
@@ -115,7 +115,7 @@ _render_cmdline_cmake_definitions() {
 
   read cmake_defs <<< $(
   echo $BODEGA_VARLIST_CMAKE_DEFINITIONS | tr ' ' '\n' | while read a
-    do
+    do [[ -n $a ]] || break
       echo -n "${a:+ }-D${a}=${!a}"
     done
     echo
