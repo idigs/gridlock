@@ -87,7 +87,7 @@ _denote_varlist_outset() {
 _uptake_varlist_outset() {
 
   local uptake_vars="$@"
-  #local outset_vars
+  local outset_vars
 
   read match_vars <<< $(
     echo $BODEGA_VARLIST_OUTSET ${uptake_vars} | tr ' ' '\n' | sort | uniq -d | tr '\n' ' '
